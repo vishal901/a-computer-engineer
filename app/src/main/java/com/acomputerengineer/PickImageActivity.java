@@ -1,8 +1,10 @@
 package com.acomputerengineer;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +14,9 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -31,6 +36,7 @@ import java.util.regex.Pattern;
 
 public class PickImageActivity extends AppCompatActivity {
 
+    private static final int REQUEST_PERMISSION = 1;
     ImageView iv = null;
     TextView tvImagePath = null;
     String strImagePath = "no image selected";
@@ -68,6 +74,11 @@ public class PickImageActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
     @TargetApi(19)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -75,6 +86,14 @@ public class PickImageActivity extends AppCompatActivity {
 
             boolean isImageFromGoogleDrive = false;
             Uri uri = data.getData();
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                    && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        REQUEST_PERMISSION);
+                return;
+            }
 
             if (isKitKat && DocumentsContract.isDocumentUri(PickImageActivity.this, uri)) {
 
